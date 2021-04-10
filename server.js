@@ -16,6 +16,7 @@ var express = require('express');
 var fs = require('fs');
 var session = require('express-session');
 var https = require('https');
+var axios = require('axios');
 var bodyParser = require('body-parser'); // Pull information from HTML POST (express4)
 var app = express(); // Create our app with express
 
@@ -218,6 +219,69 @@ app.post('/api-sessions/remove-user', function (req, res) {
                 console.log(sessionName + ' empty!');
                 delete mapSessions[sessionName];
             }
+            res.status(200).send();
+        } else {
+            var msg = 'Problems in the app server: the SESSION does not exist';
+            console.log(msg);
+            res.status(500).send(msg);
+        }
+    }
+});
+
+app.post('/api-sessions/send-data', function (req, res) {
+    if (!isLogged(req.session)) {
+        req.session.destroy();
+        res.status(401).send('User not logged');
+    } else {
+        let sessionName = req.body.sessionName;
+        let receiverList = req.body.receiverList;
+        let data = req.body.data;
+
+        if (mapSessions[sessionName] && mapSessionNamesTokens[sessionName]) {
+            let handledData = 'Handled by BE (' + data + ')';
+
+            let body = JSON.stringify({
+                data: handledData,
+                to: receiverList,
+                type: 'data-transfer'
+            });
+
+            console.log(OV.host);
+            console.log(OV.basicAuth);
+
+            axios.post(
+                OV.host + '/openvidu/api/signal',
+                body,
+                {
+                    headers: {
+                        'Authorization': OV.basicAuth,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            )
+                .then(res => {
+                    if (res.status !== 200) {
+
+                        // ERROR response from openvidu-server. Resolve HTTP status
+                        reject(new Error(res.status.toString()));
+                    }
+                }).catch(error => {
+                if (error.response) {
+                    // The request was made and the server responded with a status code (not 2xx)
+                        reject(new Error(error.response.status.toString()));
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                    // http.ClientRequest in node.js
+                    console.error(error.request);
+                    reject(new Error(error.request));
+                } else {
+                    // Something happened in setting up the request that triggered an Error
+                    console.error('Error', error.message);
+                    reject(new Error(error.message));
+                }
+            });
+
             res.status(200).send();
         } else {
             var msg = 'Problems in the app server: the SESSION does not exist';
