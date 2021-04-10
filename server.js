@@ -16,7 +16,7 @@ var express = require('express');
 var fs = require('fs');
 var session = require('express-session');
 var https = require('https');
-var axios = require('axios');
+const axios = require('axios').default;
 var bodyParser = require('body-parser'); // Pull information from HTML POST (express4)
 var app = express(); // Create our app with express
 
@@ -234,53 +234,32 @@ app.post('/api-sessions/send-data', function (req, res) {
         res.status(401).send('User not logged');
     } else {
         let sessionName = req.body.sessionName;
+        let sessionId = req.body.sessionId;
         let receiverList = req.body.receiverList;
         let data = req.body.data;
 
         if (mapSessions[sessionName] && mapSessionNamesTokens[sessionName]) {
-            let handledData = 'Handled by BE (' + data + ')';
-
-            let body = JSON.stringify({
-                data: handledData,
-                to: receiverList,
-                type: 'data-transfer'
-            });
-
-            console.log(OV.host);
-            console.log(OV.basicAuth);
-
-            axios.post(
-                OV.host + '/openvidu/api/signal',
-                body,
-                {
-                    headers: {
-                        'Authorization': OV.basicAuth,
-                        'Content-Type': 'application/json'
-                    }
-                }
-            )
-                .then(res => {
-                    if (res.status !== 200) {
-
-                        // ERROR response from openvidu-server. Resolve HTTP status
-                        reject(new Error(res.status.toString()));
-                    }
-                }).catch(error => {
-                if (error.response) {
-                    // The request was made and the server responded with a status code (not 2xx)
-                        reject(new Error(error.response.status.toString()));
-                } else if (error.request) {
-                    // The request was made but no response was received
-                    // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-                    // http.ClientRequest in node.js
-                    console.error(error.request);
-                    reject(new Error(error.request));
-                } else {
-                    // Something happened in setting up the request that triggered an Error
-                    console.error('Error', error.message);
-                    reject(new Error(error.message));
+            const instance = axios.create({
+                baseURL: OV.host,
+                headers: {
+                    'Authorization': OV.basicAuth,
+                    'Content-Type': 'application/json'
                 }
             });
+
+            instance
+                .post('/openvidu/api/signal', {
+                    session: sessionId,
+                    data: 'Handled by BE (' + data + ')',
+                    to: receiverList,
+                    type: 'data-transfer'
+                })
+                .then(function (response) {
+                    console.log(response);
+                })
+                .catch(function (error) {
+                    console.log(error);
+                });
 
             res.status(200).send();
         } else {

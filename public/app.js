@@ -310,6 +310,7 @@ function sendData(data) {
 		'api-sessions/send-data',
 		{
 			sessionName: sessionName,
+			sessionId: session.sessionId,
 			token: token,
 			sender: sender,
 			receiverList: receiverList,
