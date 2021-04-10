@@ -384,23 +384,24 @@ function linebreak(s) {
   return s.replace(two_line, "<p></p>").replace(one_line, "<br>");
 }
 function sendData(data) {
-  var sender = session.connection.connectionId;
-  var receiverList = Array.from(session.remoteConnections.keys());
+	var sender = session.connection.connectionId;
+	var receiverList = Array.from(session.remoteConnections.keys());
 
-  httpPostRequest(
-    "api-sessions/send-data",
-    {
-      sessionName: sessionName,
-      token: token,
-      sender: sender,
-      receiverList: receiverList,
-      data: data,
-    },
-    "User couldn't send data",
-    (response) => {
-      console.info("Data was sent");
-    }
-  );
+	httpPostRequest(
+		'api-sessions/send-data',
+		{
+			sessionName: sessionName,
+			sessionId: session.sessionId,
+			token: token,
+			sender: sender,
+			receiverList: receiverList,
+			data: data
+		},
+		'User couldn\'t send data',
+		(response) => {
+			console.info('Data was sent');
+		}
+	);
 }
 
 /* APPLICATION BROWSER METHODS */
