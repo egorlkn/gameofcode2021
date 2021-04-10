@@ -191,15 +191,15 @@ for (var i = 0; i < langs.length; i++) {
   select_language.options[i] = new Option(langs[i][0], i);
 }
 // Set default language / dialect.
-var defaultLang = 10
-var defaultDialect = 11
+var defaultLang = '';//10
+var defaultDialect = 52//11
 try {
   defaultLang = localStorage.getItem('defaultLang');
   defaultDialect = localStorage.getItem('defaultDialect');
 } catch (e) {}
 
-select_language.selectedIndex = defaultLang;
-select_dialect.selectedIndex = defaultDialect;
+if (defaultLang) select_language.selectedIndex = defaultLang;
+if (defaultDialect)  select_dialect.selectedIndex = defaultDialect;
 
 
 function updateCountry() {

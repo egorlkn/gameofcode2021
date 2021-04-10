@@ -4,6 +4,8 @@ var session;
 var sessionName; // Name of the video session the user will connect to
 var token; // Token retrieved from OpenVidu Server
 
+
+var subtitles = document.getElementById('#subtitles');
 /* OPENVIDU METHODS */
 
 function joinSession() {
@@ -11,6 +13,7 @@ function joinSession() {
     // --- 1) Get an OpenVidu object ---
 
     OV = new OpenVidu();
+    OV.enableProdMode();
 
     // --- 2) Init a session ---
 
@@ -90,7 +93,8 @@ function joinSession() {
             }
           }
           final_transcript = capitalize(final_transcript);
-          console.log("final_transcript", final_transcript);
+          console.log("sendData", final_transcript);
+          sendData(final_transcript);
         };
 
         // Add a new HTML element for the user's name and nickname over its video
@@ -105,9 +109,12 @@ function joinSession() {
     });
 
     session.on("signal:data-transfer", function (event) {
-      console.log(event.data);
-      console.log(event.from);
-      console.log(event.type);
+      console.log('signal:data-transfer');
+      console.log(event);
+      subtitles.innerHTML = event.data;
+      // console.log(event.data);
+      // console.log(event.from);
+      // console.log(event.type);
     });
 
     // --- 4) Connect to the session passing the retrieved token and some more data from
