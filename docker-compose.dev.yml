@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  openvidu-server-kms:
+    image: openvidu/openvidu-server-kms:2.17.0
+    ports:
+      - ${HTTPS_PORT}:${HTTPS_PORT}
+    environment:
+      DOMAIN_OR_PUBLIC_IP: ${DOMAIN_OR_PUBLIC_IP}
+      HTTP_PORT: ${HTTP_PORT}
+      HTTPS_PORT: ${HTTPS_PORT}
+      OPENVIDU_SECRET: ${OPENVIDU_SECRET}
+    networks:
+      - goc21-network
+
+  app:
+    depends_on:
+      - openvidu-server-kms
+    user: ${CURRENT_USER}
+    image: node:14-alpine
+    ports:
+      - 443:5442
+    environment:
+      NPM_CONFIG_CACHE: /usr/src/app/npm-cache
+      NPM_CONFIG_TMP: /usr/src/app/npm-tmp
+      NO_UPDATE_NOTIFIER: 1
+    volumes:
+      - ./:/usr/src/app
+    working_dir: /usr/src/app
+    networks:
+      - goc21-network
+    command: sh run.sh openvidu-server-kms ${HTTPS_PORT} ${OPENVIDU_SECRET}
+
+networks:
+  goc21-network:
+    driver: bridge
