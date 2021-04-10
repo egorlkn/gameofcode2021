@@ -237,29 +237,53 @@ app.post('/api-sessions/send-data', function (req, res) {
         let sessionId = req.body.sessionId;
         let receiverList = req.body.receiverList;
         let data = req.body.data;
+        let translatedData = '';
 
         if (mapSessions[sessionName] && mapSessionNamesTokens[sessionName]) {
-            const instance = axios.create({
-                baseURL: OV.host,
+            const transapi = axios.create({
+                baseURL: 'https://translate.api.cloud.yandex.net',
                 headers: {
-                    'Authorization': OV.basicAuth,
-                    'Content-Type': 'application/json'
+                    'Authorization': 'Bearer t1.9euelZqUjZfInMedm47Oz5vMyZTLyO3rnpWal46Sl86UzYuLnIrGl8bIyp3l8_dCHjh8-e9_aAtK_t3z9wJNNXz5739oC0r-.c08ekUkDxqclJ2Xr16m7C7Uy7fBqGz4jBBnTq8dnjhHib5Yfs4TCnBij3HN3xhExchPu3WWz9CfrNEZAhlPcBg',
                 }
             });
 
-            instance
-                .post('/openvidu/api/signal', {
-                    session: sessionId,
-                    data: 'Handled by BE (' + data + ')',
-                    to: receiverList,
-                    type: 'data-transfer'
+            transapi
+                .post('/translate/v2/translate', {
+                    "sourceLanguageCode": "ru",
+                    "targetLanguageCode": "en",
+                    "texts": [data],
+                    "folderId": "b1gug5odflske4af5d9i"
                 })
                 .then(function (response) {
-                    console.log(response);
+                    // console.log(response);
+                    translatedData = response.data.translations[0].text;
+
+                    const ovapi = axios.create({
+                        baseURL: OV.host,
+                        headers: {
+                            'Authorization': OV.basicAuth,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    ovapi
+                        .post('/openvidu/api/signal', {
+                            session: sessionId,
+                            data: translatedData,
+                            to: receiverList,
+                            type: 'data-transfer'
+                        })
+                        .then(function (response) {
+                            // console.log(response);
+                        })
+                        .catch(function (error) {
+                            // console.log(error);
+                        });
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    // console.log(error);
                 });
+
 
             res.status(200).send();
         } else {
