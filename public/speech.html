@@ -293,20 +293,16 @@ if (!('webkitSpeechRecognition' in window)) {
     final_transcript = capitalize(final_transcript);
     final_span.innerHTML = linebreak(final_transcript);
     interim_span.innerHTML = linebreak(interim_transcript);
-    console.log(final_transcript);
+    // console.log(final_transcript);
     if (final_transcript) {
-        var toBeTranslated = {
-          lang: 'ru-RU',
-          text: final_transcript
-        }
-        window.top.sendData(toBeTranslated);
-        console.log("sendData", toBeTranslated);
+        window.top.sendData(final_transcript);
+       // console.log("sendData", toBeTranslated);
       }
     
   };
   // setTimeout(startButton, 150);
 }
-setTimeout(updateCountry, 150);
+setTimeout(updateCountry, 200);
 
 function upgrade() {
 

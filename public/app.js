@@ -45,7 +45,7 @@ function joinSession() {
     console.assert(subtitles !== null, 'subtitles');
     session.on('signal', function (event) {
       if (event.type === 'signal:data-transfer') {;
-        subtitles.innerHTML = event.data.text;
+        subtitles.innerHTML = event.data;
       }
     });
 
