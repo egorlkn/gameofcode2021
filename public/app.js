@@ -41,6 +41,12 @@ function joinSession() {
 			removeUserData(event.stream.connection);
 		});
 
+		session.on('signal:data-transfer', function (event) {
+			console.log(event.data);
+			console.log(event.from);
+			console.log(event.type);
+		});
+
 		// --- 4) Connect to the session passing the retrieved token and some more data from
 		//        the client (in this case a JSON with the nickname chosen by the user) ---
 		
@@ -294,6 +300,26 @@ function cleanSessionView() {
 	removeAllUserData();
 	cleanMainVideo();
 	$('#main-video video').css("background", "");
+}
+
+function sendData(data) {
+	var sender = session.connection.connectionId;
+	var receiverList = Array.from(session.remoteConnections.keys());
+
+	httpPostRequest(
+		'api-sessions/send-data',
+		{
+			sessionName: sessionName,
+			token: token,
+			sender: sender,
+			receiverList: receiverList,
+			data: data
+		},
+		'User couldn\'t send data',
+		(response) => {
+			console.info('Data was sent');
+		}
+	);
 }
 
 /* APPLICATION BROWSER METHODS */
