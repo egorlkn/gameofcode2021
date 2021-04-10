@@ -108,13 +108,12 @@ function joinSession() {
       removeUserData(event.stream.connection);
     });
 
-    session.on("signal:data-transfer", function (event) {
-      console.log('signal:data-transfer');
-      console.log(event);
-      subtitles.innerHTML = event.data;
-      // console.log(event.data);
-      // console.log(event.from);
-      // console.log(event.type);
+    session.on('signal', function (event) {
+      if (event.type === 'signal:data-transfer') {
+        console.log('signal:data-transfer');
+        console.log(event);
+        subtitles.innerHTML = event.data;
+      }
     });
 
     // --- 4) Connect to the session passing the retrieved token and some more data from
