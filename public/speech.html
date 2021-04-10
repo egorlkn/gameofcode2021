@@ -191,18 +191,21 @@ for (var i = 0; i < langs.length; i++) {
   select_language.options[i] = new Option(langs[i][0], i);
 }
 // Set default language / dialect.
-var defaultLang = '';//10
-var defaultDialect = 52//11
+var defaultLang = '52';//10
+var defaultDialect = '52';//11
 try {
-  defaultLang = localStorage.getItem('defaultLang');
-  defaultDialect = localStorage.getItem('defaultDialect');
+  var pesistedLang = localStorage.getItem('defaultLang');
+  var pesistedDialect = localStorage.getItem('defaultDialect');
+  if (pesistedLang) defaultLang = pesistedLang;
+  if (pesistedDialect) defaultDialect = pesistedDialect;
 } catch (e) {}
 
-if (defaultLang) select_language.selectedIndex = defaultLang;
-if (defaultDialect)  select_dialect.selectedIndex = defaultDialect;
+if (defaultLang) select_language.value = defaultLang;
+if (defaultDialect)  select_dialect.value = defaultDialect;
 
 
 function updateCountry() {
+    console.log('updateCountry');
   for (var i = select_dialect.options.length - 1; i >= 0; i--) {
     select_dialect.remove(i);
   }
@@ -291,12 +294,20 @@ if (!('webkitSpeechRecognition' in window)) {
     final_span.innerHTML = linebreak(final_transcript);
     interim_span.innerHTML = linebreak(interim_transcript);
     console.log(final_transcript);
+    if (final_transcript) {
+        var toBeTranslated = {
+          lang: 'ru-RU',
+          text: final_transcript
+        }
+        window.top.sendData(toBeTranslated);
+        console.log("sendData", toBeTranslated);
+      }
     
   };
-  setTimeout(startButton, 150);
+  // setTimeout(startButton, 150);
 }
+setTimeout(updateCountry, 150);
 
-updateCountry();
 function upgrade() {
 
 }
@@ -328,6 +339,7 @@ function emailButton() {
 }
 
 function startButton(event) {
+  console.log('startButton')
   if (recognizing) {
     recognition.stop();
     return;
@@ -342,6 +354,8 @@ function startButton(event) {
 
   if (event) start_timestamp = event.timeStamp;
 }
+
+
 
     </script>
   </body>
