@@ -29,6 +29,74 @@ function joinSession() {
 
 			// When the HTML video has been appended to DOM...
 			subscriber.on('videoElementCreated', (event) => {
+				var final_transcript = '';
+				var recognizing = false;
+				var ignore_onend;
+				var start_timestamp;
+				var recognition = new webkitSpeechRecognition();
+				window.startRecognition = () => {
+					recognition.start();
+				}
+				recognition.continuous = true;
+				recognition.interimResults = true;
+				recognition.lang = 'en-US';
+				recognition.onstart = function() {
+					recognizing = true;
+					showInfo('recognition.onstart');
+					// start_img.src = 'mic-animate.gif';
+				};
+
+				recognition.onerror = function(event) {
+					showInfo('recognition.onerror', event);
+					if (event.error == 'no-speech') {
+						// start_img.src = 'mic.gif';
+						showInfo('info_no_speech');
+						ignore_onend = true;
+					}
+					if (event.error == 'audio-capture') {
+						//start_img.src = 'mic.gif';
+						showInfo('info_no_microphone');
+						ignore_onend = true;
+					}
+					if (event.error == 'not-allowed') {
+						if (event.timeStamp - start_timestamp < 100) {
+						showInfo('info_blocked');
+						} else {
+						showInfo('info_denied');
+						}
+						ignore_onend = true;
+					}
+				};
+				
+				recognition.onend = function() {
+					showInfo('recognition.onend');
+					recognizing = false;
+					if (ignore_onend) {
+						return;
+					}
+					// start_img.src = 'mic.gif';
+					if (!final_transcript) {
+						showInfo('info_start');
+						return;
+					}
+					showInfo('');
+				};
+				
+				recognition.onresult = function(event) {
+					showInfo('recognition.onresult', event);
+					var interim_transcript = '';
+					for (var i = event.resultIndex; i < event.results.length; ++i) {
+						if (event.results[i].isFinal) {
+						final_transcript += event.results[i][0].transcript;
+						} else {
+						interim_transcript += event.results[i][0].transcript;
+						}
+					}
+					final_transcript = capitalize(final_transcript);
+					console.log('final_transcript', final_transcript);
+				};
+
+
 
 				// Add a new HTML element for the user's name and nickname over its video
 				appendUserData(event.element, subscriber.stream.connection);
@@ -297,3 +365,16 @@ function cleanSessionView() {
 }
 
 /* APPLICATION BROWSER METHODS */
+
+function showInfo() {
+	console.log(arguments);
+}
+
+function capitalize(s) {
+	return s.replace(first_char, function(m) { return m.toUpperCase(); });
+  }
+
+
+  function linebreak(s) {
+	return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+  }
