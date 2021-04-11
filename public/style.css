@@ -344,6 +344,15 @@ table i {
 	font-weight: bold;
 }
 
+.sub {
+	position: absolute;
+	width: calc(100% - 3rem);
+	background: gray;
+	color: white;
+	padding: 1em;
+	font-weight: bold;
+	font-size: medium;
+}
 
 /* xs ans md screen resolutions*/
 

@@ -41,10 +41,11 @@ function joinSession() {
       // Delete the HTML element with the user's name and nickname
       removeUserData(event.stream.connection);
     });
+
     var subtitles = document.getElementById('subtitles');
-    console.assert(subtitles !== null, 'subtitles');
+
     session.on('signal', function (event) {
-      if (event.type === 'signal:data-transfer') {;
+      if (event.type === 'signal:data-transfer') {
         subtitles.innerHTML = event.data;
       }
     });
@@ -58,16 +59,9 @@ function joinSession() {
       .then(() => {
         // --- 5) Set page layout for active call ---
 
-        var userName = $("#user").val();
-        $("#session-title").text(sessionName);
         $("#join").hide();
         $("#session").show();
 
-        // Here we check somehow if the user has 'PUBLISHER' role before
-        // trying to publish its stream. Even if someone modified the client's code and
-        // published the stream, it wouldn't work if the token sent in Session.connect
-        // method is not recognized as 'PUBLIHSER' role by OpenVidu Server
-        if (isPublisher(userName)) {
           // --- 6) Get your own camera stream ---
 
           var publisher = OV.initPublisher("video-container", {
@@ -87,8 +81,7 @@ function joinSession() {
           publisher.on("videoElementCreated", (event) => {
             // Init the main video with ours and append our data
             var userData = {
-              nickName: nickName,
-              userName: userName,
+              nickName: nickName
             };
             initMainVideo(event.element, userData);
             appendUserData(event.element, userData);
@@ -98,10 +91,6 @@ function joinSession() {
           // --- 8) Publish your stream ---
 
           session.publish(publisher);
-        } else {
-          console.warn("You don't have permissions to publish");
-          initMainVideoThumbnail(); // Show SUBSCRIBER message in main video
-        }
       })
       .catch((error) => {
         console.warn(
@@ -133,20 +122,14 @@ function leaveSession() {
 /* APPLICATION REST METHODS */
 
 function logIn() {
-  var user = $("#user").val(); // Username
-  var pass = $("#pass").val(); // Password
+  var user = "User_" + Math.floor(Math.random() * 100);
 
   httpPostRequest(
     "api-login/login",
-    { user: user, pass: pass },
+    { user: user },
     "Login WRONG",
     (response) => {
-      $("#name-user").text(user);
-      $("#not-logged").hide();
-      $("#logged").show();
-      // Random nickName and session
-      $("#sessionName").val("Session " + Math.floor(Math.random() * 10));
-      $("#nickName").val("Participant " + Math.floor(Math.random() * 100));
+      $("#nickName").val("Participant_" + Math.floor(Math.random() * 100));
     }
   );
 }
@@ -159,7 +142,7 @@ function logOut() {
 }
 
 function getToken(callback) {
-  sessionName = $("#sessionName").val(); // Video-call chosen by the user
+  sessionName = 'Default_session'; // Video-call chosen by the user
 
   httpPostRequest(
     "api-sessions/get-token",
@@ -227,7 +210,6 @@ function appendUserData(videoElement, connection) {
   if (connection.nickName) {
     // Appending local video data
     clientData = connection.nickName;
-    serverData = connection.userName;
     nodeId = "main-videodata";
   } else {
     clientData = JSON.parse(connection.data.split("%/%")[0]).clientData;
@@ -237,12 +219,7 @@ function appendUserData(videoElement, connection) {
   var dataNode = document.createElement("div");
   dataNode.className = "data-node";
   dataNode.id = "data-" + nodeId;
-  dataNode.innerHTML =
-    "<p class='nickName'>" +
-    clientData +
-    "</p><p class='userName'>" +
-    serverData +
-    "</p>";
+  dataNode.innerHTML = "<p class='nickName'>" + clientData + "</p>";
   videoElement.parentNode.insertBefore(dataNode, videoElement.nextSibling);
   addClickListener(videoElement, clientData, serverData);
 }
@@ -275,7 +252,6 @@ function addClickListener(videoElement, clientData, serverData) {
     if (mainVideo.srcObject !== videoElement.srcObject) {
       $("#main-video").fadeOut("fast", () => {
         $("#main-video p.nickName").html(clientData);
-        $("#main-video p.userName").html(serverData);
         mainVideo.srcObject = videoElement.srcObject;
         $("#main-video").fadeIn("fast");
       });
@@ -286,7 +262,6 @@ function addClickListener(videoElement, clientData, serverData) {
 function initMainVideo(videoElement, userData) {
   $("#main-video video").get(0).srcObject = videoElement.srcObject;
   $("#main-video p.nickName").html(userData.nickName);
-  $("#main-video p.userName").html(userData.userName);
   $("#main-video video").prop("muted", true);
 }
 

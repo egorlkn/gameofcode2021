@@ -80,24 +80,8 @@ console.log("App listening on port 5442");
 
 // Login
 app.post('/api-login/login', function (req, res) {
-
-    // Retrieve params from POST body
-    var user = req.body.user;
-    var pass = req.body.pass;
-    console.log("Logging in | {user, pass}={" + user + ", " + pass + "}");
-
-    if (login(user, pass)) { // Correct user-pass
-        // Validate session and return OK
-        // Value stored in req.session allows us to identify the user in future requests
-        console.log("'" + user + "' has logged in");
-        req.session.loggedUser = user;
-        res.status(200).send();
-    } else { // Wrong user-pass
-        // Invalidate session and return error
-        console.log("'" + user + "' invalid credentials");
-        req.session.destroy();
-        res.status(401).send('User/Pass incorrect');
-    }
+    req.session.loggedUser = req.body.user;
+    res.status(200).send();
 });
 
 // Logout
@@ -116,9 +100,6 @@ app.post('/api-sessions/get-token', function (req, res) {
         // The video-call to connect
         var sessionName = req.body.sessionName;
 
-        // Role associated to this user
-        var role = users.find(u => (u.user === req.session.loggedUser)).role;
-
         // Optional data to be passed to other users when this user connects to the video-call
         // In this case, a JSON with the value we stored in the req.session object on login
         var serverData = JSON.stringify({ serverData: req.session.loggedUser });
@@ -128,7 +109,7 @@ app.post('/api-sessions/get-token', function (req, res) {
         // Build connectionProperties object with the serverData and the role
         var connectionProperties = {
             data: serverData,
-            role: role
+            role: OpenViduRole.PUBLISHER
         };
 
         if (mapSessions[sessionName]) {
@@ -313,10 +294,6 @@ app.post('/api-sessions/send-data', function (req, res) {
 
 
 /* AUXILIARY METHODS */
-
-function login(user, pass) {
-    return (users.find(u => (u.user === user) && (u.pass === pass)));
-}
 
 function isLogged(session) {
     return (session.loggedUser != null);
