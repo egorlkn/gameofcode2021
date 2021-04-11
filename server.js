@@ -248,33 +248,48 @@ app.post('/api-sessions/send-data', function (req, res) {
             });
 
             transapi
-                .post('/translate/v2/translate', {
-                    "sourceLanguageCode": "ru",
-                    "targetLanguageCode": "en",
-                    "texts": [data],
+                .post('/translate/v2/detect', {
+                    "text": data,
                     "folderId": "b1gug5odflske4af5d9i"
                 })
                 .then(function (response) {
                     // console.log(response);
-                    translatedData = response.data.translations[0].text;
 
-                    const ovapi = axios.create({
-                        baseURL: OV.host,
-                        headers: {
-                            'Authorization': OV.basicAuth,
-                            'Content-Type': 'application/json'
-                        }
-                    });
+                    let languageCode = response.data.languageCode;
 
-                    ovapi
-                        .post('/openvidu/api/signal', {
-                            session: sessionId,
-                            data: translatedData,
-                            to: receiverList,
-                            type: 'data-transfer'
+                    transapi
+                        .post('/translate/v2/translate', {
+                            "sourceLanguageCode": languageCode,
+                            "targetLanguageCode": "en",
+                            "texts": [data],
+                            "folderId": "b1gug5odflske4af5d9i"
                         })
                         .then(function (response) {
                             // console.log(response);
+
+                            translatedData = response.data.translations[0].text;
+
+                            const ovapi = axios.create({
+                                baseURL: OV.host,
+                                headers: {
+                                    'Authorization': OV.basicAuth,
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+
+                            ovapi
+                                .post('/openvidu/api/signal', {
+                                    session: sessionId,
+                                    data: translatedData,
+                                    to: receiverList,
+                                    type: 'data-transfer'
+                                })
+                                .then(function (response) {
+                                    // console.log(response);
+                                })
+                                .catch(function (error) {
+                                    // console.log(error);
+                                });
                         })
                         .catch(function (error) {
                             // console.log(error);
@@ -283,7 +298,6 @@ app.post('/api-sessions/send-data', function (req, res) {
                 .catch(function (error) {
                     // console.log(error);
                 });
-
 
             res.status(200).send();
         } else {
