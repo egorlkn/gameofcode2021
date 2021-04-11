@@ -29,7 +29,8 @@
     border: 1px solid #ddd;
     padding: 15px;
     text-align: left;
-    min-height: 150px;
+    max-height: 100px;
+    min-height: 100px;
     }
     #start_button {
     border: 0;
@@ -77,15 +78,17 @@ a.c1 {font-weight: normal;}
           "interim_span"></span>
         </div>
         <div class="compact marquee" id="div_language">
+          <p><b>Choose your own language<br>and start speak!</b></p>
           <select id="select_language" onchange="updateCountry()">
-            </select>&nbsp;&nbsp; <select id="select_dialect">
+            </select>&nbsp;&nbsp; <select id="select_dialect" style="visibility: hidden;">
             </select>
         </div>
       </div>
     </div>
     <script>
 var langs =
-[['Afrikaans',       ['af-ZA']],
+[['',       ['']],
+ ['Afrikaans',       ['af-ZA']],
  ['አማርኛ',           ['am-ET']],
  ['Azərbaycanca',    ['az-AZ']],
  ['বাংলা',            ['bn-BD', 'বাংলাদেশ'],
@@ -191,8 +194,8 @@ for (var i = 0; i < langs.length; i++) {
   select_language.options[i] = new Option(langs[i][0], i);
 }
 // Set default language / dialect.
-var defaultLang = '52';//10
-var defaultDialect = '52';//11
+var defaultLang = '0';
+var defaultDialect = '0';
 try {
   var pesistedLang = localStorage.getItem('defaultLang');
   var pesistedDialect = localStorage.getItem('defaultDialect');
@@ -205,7 +208,6 @@ if (defaultDialect)  select_dialect.value = defaultDialect;
 
 
 function updateCountry() {
-    console.log('updateCountry');
   for (var i = select_dialect.options.length - 1; i >= 0; i--) {
     select_dialect.remove(i);
   }
@@ -214,17 +216,14 @@ function updateCountry() {
     select_dialect.options.add(new Option(list[i][1], list[i][0]));
   }
   select_dialect.style.visibility = list[1].length == 1 ? 'hidden' : 'visible';
-  startButton();
+  startRec();
 }
 
-var create_email = false;
 var final_transcript = '';
 var recognizing = false;
 var ignore_onend;
 var start_timestamp;
-if (!('webkitSpeechRecognition' in window)) {
-  upgrade();
-} else {
+
   recognition = new webkitSpeechRecognition();
   recognition.continuous = true;
   recognition.interimResults = true;
@@ -269,10 +268,6 @@ if (!('webkitSpeechRecognition' in window)) {
       range.selectNode(document.getElementById('final_span'));
       window.getSelection().addRange(range);
     }
-    if (create_email) {
-      create_email = false;
-      createEmail();
-    }
   };
 
   recognition.onresult = function(event) {
@@ -280,7 +275,6 @@ if (!('webkitSpeechRecognition' in window)) {
     if (typeof(event.results) == 'undefined') {
       recognition.onend = null;
       recognition.stop();
-      upgrade();
       return;
     }
     for (var i = event.resultIndex; i < event.results.length; ++i) {
@@ -297,15 +291,10 @@ if (!('webkitSpeechRecognition' in window)) {
     if (final_transcript) {
         window.top.sendData(final_transcript);
       }
-    
-  };
-  // setTimeout(startButton, 150);
-}
-setTimeout(updateCountry, 200);
-
-function upgrade() {
 
 }
+
+
 
 var two_line = /\n\n/g;
 var one_line = /\n/g;
@@ -318,23 +307,7 @@ function capitalize(s) {
   return s.replace(first_char, function(m) { return m.toUpperCase(); });
 }
 
-function createEmail() {
-  var n = final_transcript.indexOf('\n');
-  if (n < 0 || n >= 80) {
-    n = 40 + final_transcript.substring(40).indexOf(' ');
-  }
-  var subject = encodeURI(final_transcript.substring(0, n));
-  var body = encodeURI(final_transcript.substring(n + 1));
-  window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
-}
-
-function copyButton() {}
-
-function emailButton() {
-}
-
-function startButton(event) {
-  console.log('startButton')
+function startRec(event) {
   if (recognizing) {
     recognition.stop();
     return;
@@ -349,8 +322,6 @@ function startButton(event) {
 
   if (event) start_timestamp = event.timeStamp;
 }
-
-
 
     </script>
   </body>
