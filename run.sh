@@ -2,4 +2,4 @@
 
 npm install
 
-node server.js https://"$1":"$2" "$3"
+node server.js https://"$1":"$2" "$3" "$4"

@@ -29,7 +29,7 @@ services:
     working_dir: /usr/src/app
     networks:
       - goc21-network
-    command: sh run.sh openvidu-server-kms ${HTTPS_PORT} ${OPENVIDU_SECRET}
+    command: sh run.sh openvidu-server-kms ${HTTPS_PORT} ${OPENVIDU_SECRET} ${YC_TOKEN}
 
 networks:
   goc21-network:

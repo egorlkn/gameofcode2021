@@ -4,8 +4,8 @@ var OpenVidu = require('openvidu-node-client').OpenVidu;
 var OpenViduRole = require('openvidu-node-client').OpenViduRole;
 
 // Check launch arguments: must receive openvidu-server URL and the secret
-if (process.argv.length != 4) {
-    console.log("Usage: node " + __filename + " OPENVIDU_URL OPENVIDU_SECRET");
+if (process.argv.length != 5) {
+    console.log("Usage: node " + __filename + " OPENVIDU_URL OPENVIDU_SECRET YC_TOKEN");
     process.exit(-1);
 }
 // For demo purposes we ignore self-signed certificate
@@ -61,6 +61,8 @@ var users = [{
 var OPENVIDU_URL = process.argv[2];
 // Environment variable: secret shared with our OpenVidu server
 var OPENVIDU_SECRET = process.argv[3];
+
+var YC_TOKEN = process.argv[4];
 
 // Entrypoint to OpenVidu Node Client SDK
 var OV = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
@@ -224,7 +226,7 @@ app.post('/api-sessions/send-data', function (req, res) {
             const transapi = axios.create({
                 baseURL: 'https://translate.api.cloud.yandex.net',
                 headers: {
-                    'Authorization': 'Bearer t1.9euelZqZkJ6Yy8aRnMiTnJqOz5XNmO3rnpWal46Sl86UzYuLnIrGl8bIyp3l8_clOjV8-e9HYhwA_d3z92VoMnz570diHAD9.brwe-J8_TqSSGwMw9Cthj2UDGwoqoZz-u45p7wCxA9ECFHBwUhRfZ-A5t9KCGSg1xG5HoAIXABQ101pv-wriAw',
+                    'Authorization': 'Bearer ' + YC_TOKEN,
                 }
             });
 
