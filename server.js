@@ -224,7 +224,7 @@ app.post('/api-sessions/send-data', function (req, res) {
             const transapi = axios.create({
                 baseURL: 'https://translate.api.cloud.yandex.net',
                 headers: {
-                    'Authorization': 'Bearer t1.9euelZqUjZfInMedm47Oz5vMyZTLyO3rnpWal46Sl86UzYuLnIrGl8bIyp3l8_dCHjh8-e9_aAtK_t3z9wJNNXz5739oC0r-.c08ekUkDxqclJ2Xr16m7C7Uy7fBqGz4jBBnTq8dnjhHib5Yfs4TCnBij3HN3xhExchPu3WWz9CfrNEZAhlPcBg',
+                    'Authorization': 'Bearer t1.9euelZqZkJ6Yy8aRnMiTnJqOz5XNmO3rnpWal46Sl86UzYuLnIrGl8bIyp3l8_clOjV8-e9HYhwA_d3z92VoMnz570diHAD9.brwe-J8_TqSSGwMw9Cthj2UDGwoqoZz-u45p7wCxA9ECFHBwUhRfZ-A5t9KCGSg1xG5HoAIXABQ101pv-wriAw',
                 }
             });
 
